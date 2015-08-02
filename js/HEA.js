@@ -499,6 +499,34 @@ source = function () {
             decrypt: core.translate.bind(this, core.decrypt)
         };
     }(this);
+    
+    void function (scope) {
+        'use strict';
+
+        var HEA,
+            postMessage,
+            onmessage;
+        
+        HEA = scope.HEA;
+        
+        postMessage = scope.postMessage;
+        
+        onmessage = function onmessage(event) {
+            var request,
+                method,
+                result;
+            
+            request = event.data;
+            
+            method = HEA[request.method];
+            
+            result = method(request);
+            
+            postMessage(result);
+        };
+        
+        scope.onmessage = onmessage;
+    }(this);
 };
 
 sourceData = '(' + source + '())';
