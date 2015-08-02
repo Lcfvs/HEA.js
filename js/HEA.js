@@ -3,520 +3,524 @@ Copyright 2014 Lcf.vs
 Released under the MIT license
 https://github.com/Lcfvs/HEA.js
 */
-var source,
-    sourceData,
-    sourceBlob,
-    HEASourceURL;
+var HEASourceURL;
 
-source = function (global) {
-    'use strict';
+HEASourceURL = function (global) {
+    var source,
+        sourceData,
+        sourceBlob;
 
-    var charsetLength,
-        utils,
-        core;
+    source = function (global) {
+        'use strict';
 
-    charsetLength = 65536;
+        var charsetLength,
+            utils,
+            core;
 
-    utils = function () {
-        var utils;
+        charsetLength = 65536;
 
-        utils = {};
+        utils = function () {
+            var utils;
 
-        /**
-        *   @method demethodize(method) - avoids .call method
-        *       @argument {Function} method
-        *       @return {Function}
-        *           @argument {Mixed} context
-        *           @argument {Mixed} ...args
-        *           @return {Mixed}
-        */
-        utils.demethodize = Function.bind.bind(Function.call);
+            utils = {};
 
-        /**
-        *   @method demethodize(method) - avoids .apply method
-        *       @argument {Function} method
-        *       @return {Function}
-        *           @argument {Mixed} context
-        *           @argument {Array} args
-        *           @return {Mixed}
-        */
-        utils.demethodizeAll = Function.bind.bind(Function.apply);
+            /**
+            *   @method demethodize(method) - avoids .call method
+            *       @argument {Function} method
+            *       @return {Function}
+            *           @argument {Mixed} context
+            *           @argument {Mixed} ...args
+            *           @return {Mixed}
+            */
+            utils.demethodize = Function.bind.bind(Function.call);
 
-        /**
-        *   @method spliceAll(array, index, howMany[, values])
-        *       @argument {Array} array
-        *       @argument {Number} index
-        *       @argument {Number} howMany
-        *       @argument {Array=} values
-        *       @return {Array}
-        */
-        utils.spliceAll = function () {
-            var spliceAll;
+            /**
+            *   @method demethodize(method) - avoids .apply method
+            *       @argument {Function} method
+            *       @return {Function}
+            *           @argument {Mixed} context
+            *           @argument {Array} args
+            *           @return {Mixed}
+            */
+            utils.demethodizeAll = Function.bind.bind(Function.apply);
 
-            spliceAll = utils.demethodizeAll(Array.prototype.splice);
+            /**
+            *   @method spliceAll(array, index, howMany[, values])
+            *       @argument {Array} array
+            *       @argument {Number} index
+            *       @argument {Number} howMany
+            *       @argument {Array=} values
+            *       @return {Array}
+            */
+            utils.spliceAll = function () {
+                var spliceAll;
 
-            return function (array, index, howMany, values) {
-                var args;
+                spliceAll = utils.demethodizeAll(Array.prototype.splice);
 
-                args = [index, howMany].concat(values);
+                return function (array, index, howMany, values) {
+                    var args;
 
-                return spliceAll(array, args);
-            };
-        }();
+                    args = [index, howMany].concat(values);
 
-        /**
-        *   @method fromCharCodes(charCodes)
-        *       @argument {Array} charCodes
-        *       @return {String}
-        */
-        utils.fromCharCodes = utils.demethodizeAll(String.fromCharCode, null);
-
-        /**
-        *   @method toCodePoints(string)
-        *       @argument {String} string
-        *       @return {Array}
-        */
-        utils.fromCodePoints = function (codePoints) {
-            var iterator,
-                current,
-                start,
-                end;
-
-            iterator = codePoints.length - 1;
-
-            for (;iterator; iterator -= 1) {
-                current = codePoints[iterator] - 0x10000;
-
-                if (current >= 0) {
-                    start = 0xD800 + (current >> 10);
-                    end = 0xDC00 + (current & 0x3FF);
-
-                    codePoints.splice(iterator, 1, start, end);
-                }
-            }
-
-            return utils.fromCharCodes(codePoints);
-        };
-
-        /**
-        *   @method toCodePoints(string)
-        *       @argument {String} string
-        *       @return {Array}
-        */
-        utils.toCodePoints = function (string) {
-            var iterator,
-                length,
-                codePoints,
-                current,
-                next;
-
-            iterator = 0;
-            length = string.length;
-            codePoints = [];
-
-            for (; iterator < length; iterator += 1) {
-                current = string.charCodeAt(iterator);
-
-                if (current >= 0xD800 && current < 0xDC00 && iterator + 1 < length) {
-                    next = string.charCodeAt(iterator + 1);
-
-                    if (next >= 0xDC00 && next < 0xE000) {
-                        iterator += 1;
-
-                        codePoints.push(0x10000 + ((current - 0xD800) << 10) + (next - 0xDC00));
-
-                        continue;
-                    }
-                }
-
-                codePoints.push(current);
-            }
-
-            return codePoints;
-        };
-
-        /**
-        *   @method reduce(array, modulo, modifier)
-        *       @argument {Array} array
-        *       @argument {Number} modulo
-        *       @argument {Number} modifier
-        *       @return {Number}
-        */
-        utils.reduce = function (array, modulo, modifier) {
-            return array.concat([modifier || 0])
-            .reduce(function (previous, current) {
-                return (previous + current) % modulo;
-            });
-        };
-
-        /**
-        *   @method random(modulo)
-        *       @argument {Number} modulo
-        *       @return {Number}
-        */
-        utils.random = function (modulo) {
-            return ~~(Math.random() * 1e9) % modulo;
-        };
-
-        /**
-        *   @method move(array, index, keyCode, toRight)
-        *       @argument {Array} array
-        *       @argument {Number} index
-        *       @argument {Number} keyCode
-        *       @argument {Boolean} toRight
-        *       @return {Array}
-        */
-        utils.move = function (array, index, keyPoint, toRight) {
-            var length,
-                position,
-                sliced1,
-                sliced2,
-                sum1,
-                sum2;
-
-            length = array.length;
-            position = toRight ? index : length - index;
-
-            sliced1 = array.slice(0, position);
-            sliced2 = array.slice(position);
-
-            sum1 = utils.reduce(sliced1, length);
-            sum2 = utils.reduce(sliced2, length);
-
-            if ((sum1 ^ keyPoint ^ index) & 1) {
-                sliced1.reverse();
-            }
-
-            if ((sum2 ^ keyPoint ^ index) & 1) {
-                sliced2.reverse();
-            }
-
-            return sliced2.concat(sliced1);
-        };
-
-        /**
-        *   @method trampoline(result)
-        *       @argument {Mixed} result
-        *       @return {Mixed}
-        */
-        utils.trampoline = function (result) {
-            while (typeof result === 'function') {
-                result = result();
-            }
-
-            return result;
-        };
-
-        return utils;
-    }();
-
-    core = function () {
-        var core;
-
-        core = {};
-
-        /**
-        *   @method getSaltPoints(length)
-        *       @argument {Number} length
-        *       @return {Array}
-        */
-        core.getSaltPoints = function () {
-            var addSaltPoint;
-
-            addSaltPoint = function (saltPoints, length) {
-                var saltCode;
-
-                if (length < 1) {
-                    return saltPoints;
-                }
-
-                return function () {
-                    length -= 1;
-                    saltPoints[length] = utils.random(charsetLength);
-
-                    return addSaltPoint(saltPoints, length);
+                    return spliceAll(array, args);
                 };
-            };
+            }();
 
-            return function (length) {
-                return utils.trampoline(addSaltPoint([], length));
-            };
-        }();
+            /**
+            *   @method fromCharCodes(charCodes)
+            *       @argument {Array} charCodes
+            *       @return {String}
+            */
+            utils.fromCharCodes = utils.demethodizeAll(String.fromCharCode, null);
 
-        /**
-        *   @method getInternalPoints(codePoints, minLength)
-        *       @argument {Array} codePoints
-        *       @argument {Number} minLength
-        *       @return {Array}
-        */
-        core.getInternalPoints = function () {
-            var addCodePoints;
+            /**
+            *   @method toCodePoints(string)
+            *       @argument {String} string
+            *       @return {Array}
+            */
+            utils.fromCodePoints = function (codePoints) {
+                var iterator,
+                    current,
+                    start,
+                    end;
 
-            addCodePoints = function (internalCodePoints, codePoints, minLength) {
-                if (internalCodePoints.length > minLength) {
-                    return internalCodePoints;
+                iterator = codePoints.length - 1;
+
+                for (;iterator; iterator -= 1) {
+                    current = codePoints[iterator] - 0x10000;
+
+                    if (current >= 0) {
+                        start = 0xD800 + (current >> 10);
+                        end = 0xDC00 + (current & 0x3FF);
+
+                        codePoints.splice(iterator, 1, start, end);
+                    }
                 }
 
-                return function () {
-                    var tmpCodePoints;
-
-                    tmpCodePoints = internalCodePoints.concat(codePoints);
-                    tmpCodePoints = core.encryptData(codePoints, tmpCodePoints);
-                    internalCodePoints = internalCodePoints.concat(tmpCodePoints);
-
-                    return addCodePoints(internalCodePoints, codePoints, minLength);
-                };
+                return utils.fromCharCodes(codePoints);
             };
 
-            return function (codePoints, minLength) {
-                return utils.trampoline(addCodePoints([], codePoints, minLength));
-            };
-        }();
+            /**
+            *   @method toCodePoints(string)
+            *       @argument {String} string
+            *       @return {Array}
+            */
+            utils.toCodePoints = function (string) {
+                var iterator,
+                    length,
+                    codePoints,
+                    current,
+                    next;
 
-        /**
-        *   @method translate(method, request)
-        *       @argument {Function} method
-        *       @argument {Object} request
-        *       @argument {String} request.data
-        *       @argument {String} request.key
-        *       @return {String}
-        */
-        core.translate = function (method, request) {
-            var data,
-                key,
-                keyPoints,
-                dataPoints,
-                translatedPoints,
-                translatedData;
+                iterator = 0;
+                length = string.length;
+                codePoints = [];
 
-            data = request.data;
-            key = request.key;
+                for (; iterator < length; iterator += 1) {
+                    current = string.charCodeAt(iterator);
 
-            if (key.length === 0) {
-                translatedData = data;
-            } else {
-                keyPoints = utils.toCodePoints(key);
-                dataPoints = utils.toCodePoints(data);
-                translatedPoints = method(keyPoints, dataPoints);
-                translatedData = utils.fromCodePoints(translatedPoints);
-            }
+                    if (current >= 0xD800 && current < 0xDC00 && iterator + 1 < length) {
+                        next = string.charCodeAt(iterator + 1);
 
-            return translatedData;
-        };
+                        if (next >= 0xDC00 && next < 0xE000) {
+                            iterator += 1;
 
-        /**
-        *   @method encrypt((keyPoints, dataPoints))
-        *       @argument {Array} keyPoints
-        *       @argument {Array} dataPoints
-        *       @return {Array}
-        */
-        core.encrypt = function (keyPoints, dataPoints) {
-            var modifier,
-                dataLength,
-                saltModulo,
-                saltLength,
-                minKeyLength,
-                internalPoints,
-                saltIndex,
-                saltPoints,
-                tmpPoints,
-                encryptedPoints;
+                            codePoints.push(0x10000 + ((current - 0xD800) << 10) + (next - 0xDC00));
 
-            modifier = utils.random(charsetLength);
-            dataLength = dataPoints.length;
-            saltModulo = keyPoints.length;
-            saltLength = utils.reduce(keyPoints, saltModulo, modifier);
-            minKeyLength = dataLength + saltLength + 1;
-            internalPoints = core.getInternalPoints(keyPoints, minKeyLength);
-            saltIndex = utils.reduce(internalPoints, dataLength);
-            saltPoints = core.getSaltPoints(saltLength);
-            tmpPoints = core.encryptData(internalPoints, dataPoints);
-            tmpPoints = core.encryptData(saltPoints, tmpPoints);
-            utils.spliceAll(tmpPoints, saltIndex, 0, saltPoints);
-            tmpPoints.push(core.encryptData(keyPoints, [modifier])[0]);
-            encryptedPoints = core.encryptData(keyPoints, tmpPoints);
+                            continue;
+                        }
+                    }
 
-            return encryptedPoints;
-        };
-
-        /**
-        *   @method decrypt((keyPoints, dataPoints))
-        *       @argument {Array} keyPoints
-        *       @argument {Array} dataPoints
-        *       @return {Array}
-        */
-        core.decrypt = function (keyPoints, dataPoints) {
-            var modifier,
-                saltModulo,
-                saltLength,
-                minKeyLength,
-                dataLength,
-                internalPoints,
-                saltIndex,
-                tmpPoints,
-                saltPoints,
-                decryptedPoints;
-
-
-            tmpPoints = core.decryptData(keyPoints, dataPoints);
-            modifier = core.decryptData(keyPoints, [tmpPoints.pop()])[0];
-            saltModulo = keyPoints.length;
-            saltLength = utils.reduce(keyPoints, saltModulo, modifier);
-            minKeyLength = tmpPoints.length;
-            dataLength = minKeyLength - saltLength;
-            internalPoints = core.getInternalPoints(keyPoints, minKeyLength);
-            saltIndex = utils.reduce(internalPoints, dataLength);
-            saltPoints = utils.spliceAll(tmpPoints, saltIndex, saltLength, []);
-            tmpPoints = core.decryptData(saltPoints, tmpPoints);
-            decryptedPoints = core.decryptData(internalPoints, tmpPoints);
-
-            return decryptedPoints;
-        };
-
-        /**
-        *   @method encryptData((keyPoints, dataPoints))
-        *       @argument {Array} keyPoints
-        *       @argument {Array} dataPoints
-        *       @return {Array}
-        */
-        core.encryptData = function () {
-            var encrypt;
-
-            encrypt = function (keyPoints, dataPoints, keyIterator) {
-                if (keyIterator === keyPoints.length) {
-                    return dataPoints;
+                    codePoints.push(current);
                 }
 
-                return function () {
-                    var dataIterator,
-                        dataLength,
-                        keyPoint,
-                        modifier,
-                        index,
-                        tmpPoints,
-                        dataPoint;
-
-                    dataIterator = 0;
-                    dataLength = dataPoints.length;
-                    keyPoint = keyPoints[keyIterator];
-                    modifier = keyPoint;
-                    index = (dataLength + keyIterator + dataIterator) % dataLength;
-
-                    if ((dataLength ^ keyPoint ^ charsetLength) % 2) {
-                        dataPoints.reverse();
-                    }
-
-                    tmpPoints = utils.move(dataPoints, index, keyPoint, true);
-
-                    for (; dataIterator < dataLength; dataIterator += 1) {
-                        dataPoint = tmpPoints[dataIterator];
-                        modifier = ((dataPoint + modifier) ^ keyPoint) % charsetLength;
-                        tmpPoints[dataIterator] = modifier;
-                    }
-
-                    return encrypt(keyPoints, tmpPoints, keyIterator + 1);
-                };
+                return codePoints;
             };
 
-            return function (keyPoints, dataPoints) {
-                return utils.trampoline(encrypt(keyPoints, dataPoints, 0));
+            /**
+            *   @method reduce(array, modulo, modifier)
+            *       @argument {Array} array
+            *       @argument {Number} modulo
+            *       @argument {Number} modifier
+            *       @return {Number}
+            */
+            utils.reduce = function (array, modulo, modifier) {
+                return array.concat([modifier || 0])
+                .reduce(function (previous, current) {
+                    return (previous + current) % modulo;
+                });
             };
-        }();
 
-        /**
-        *   @method decryptData((keyPoints, dataPoints))
-        *       @argument {Array} keyPoints
-        *       @argument {Array} dataPoints
-        *       @return {Array}
-        */
-        core.decryptData = function () {
-            var decrypt;
+            /**
+            *   @method random(modulo)
+            *       @argument {Number} modulo
+            *       @return {Number}
+            */
+            utils.random = function (modulo) {
+                return ~~(Math.random() * 1e9) % modulo;
+            };
 
-            decrypt = function (keyPoints, dataPoints, keyIterator) {
-                if (keyIterator < 0) {
-                    return dataPoints;
+            /**
+            *   @method move(array, index, keyCode, toRight)
+            *       @argument {Array} array
+            *       @argument {Number} index
+            *       @argument {Number} keyCode
+            *       @argument {Boolean} toRight
+            *       @return {Array}
+            */
+            utils.move = function (array, index, keyPoint, toRight) {
+                var length,
+                    position,
+                    sliced1,
+                    sliced2,
+                    sum1,
+                    sum2;
+
+                length = array.length;
+                position = toRight ? index : length - index;
+
+                sliced1 = array.slice(0, position);
+                sliced2 = array.slice(position);
+
+                sum1 = utils.reduce(sliced1, length);
+                sum2 = utils.reduce(sliced2, length);
+
+                if ((sum1 ^ keyPoint ^ index) & 1) {
+                    sliced1.reverse();
                 }
 
-                return function () {
-                    var dataLength,
-                        dataIterator,
-                        keyPoint,
-                        dataPoint,
-                        modifier,
-                        index;
+                if ((sum2 ^ keyPoint ^ index) & 1) {
+                    sliced2.reverse();
+                }
 
-                    dataLength = dataPoints.length;
-                    dataIterator = dataLength - 1;
-                    keyPoint = keyPoints[keyIterator];
-
-                    for (; dataIterator > -1; dataIterator -= 1) {
-                        dataPoint = dataPoints[dataIterator] + charsetLength;
-
-                        modifier = dataIterator === 0
-                            ? keyPoint
-                            : dataPoints[dataIterator - 1];
-
-                        dataPoint = ((dataPoint ^ keyPoint) - modifier) % charsetLength;
-                        dataPoints[dataIterator] = dataPoint;
-                    }
-
-                    index = (dataLength + keyIterator + dataIterator + 1) % dataLength;
-
-                    dataPoints = utils.move(dataPoints, index, keyPoint, false);
-
-                    if ((dataLength ^ keyPoint ^ charsetLength) % 2) {
-                        dataPoints.reverse();
-                    }
-
-                    return decrypt(keyPoints, dataPoints, keyIterator - 1);
-                };
+                return sliced2.concat(sliced1);
             };
 
-            return function (keyPoints, dataPoints) {
-                return utils.trampoline(decrypt(keyPoints, dataPoints, keyPoints.length - 1));
+            /**
+            *   @method trampoline(result)
+            *       @argument {Mixed} result
+            *       @return {Mixed}
+            */
+            utils.trampoline = function (result) {
+                while (typeof result === 'function') {
+                    result = result();
+                }
+
+                return result;
             };
+
+            return utils;
         }();
 
-        return core;
-    }();
+        core = function () {
+            var core;
 
-    /**
-    *   @property {Object} HEA
-    */
-    global.HEA = {
+            core = {};
+
+            /**
+            *   @method getSaltPoints(length)
+            *       @argument {Number} length
+            *       @return {Array}
+            */
+            core.getSaltPoints = function () {
+                var addSaltPoint;
+
+                addSaltPoint = function (saltPoints, length) {
+                    var saltCode;
+
+                    if (length < 1) {
+                        return saltPoints;
+                    }
+
+                    return function () {
+                        length -= 1;
+                        saltPoints[length] = utils.random(charsetLength);
+
+                        return addSaltPoint(saltPoints, length);
+                    };
+                };
+
+                return function (length) {
+                    return utils.trampoline(addSaltPoint([], length));
+                };
+            }();
+
+            /**
+            *   @method getInternalPoints(codePoints, minLength)
+            *       @argument {Array} codePoints
+            *       @argument {Number} minLength
+            *       @return {Array}
+            */
+            core.getInternalPoints = function () {
+                var addCodePoints;
+
+                addCodePoints = function (internalCodePoints, codePoints, minLength) {
+                    if (internalCodePoints.length > minLength) {
+                        return internalCodePoints;
+                    }
+
+                    return function () {
+                        var tmpCodePoints;
+
+                        tmpCodePoints = internalCodePoints.concat(codePoints);
+                        tmpCodePoints = core.encryptData(codePoints, tmpCodePoints);
+                        internalCodePoints = internalCodePoints.concat(tmpCodePoints);
+
+                        return addCodePoints(internalCodePoints, codePoints, minLength);
+                    };
+                };
+
+                return function (codePoints, minLength) {
+                    return utils.trampoline(addCodePoints([], codePoints, minLength));
+                };
+            }();
+
+            /**
+            *   @method translate(method, request)
+            *       @argument {Function} method
+            *       @argument {Object} request
+            *       @argument {String} request.data
+            *       @argument {String} request.key
+            *       @return {String}
+            */
+            core.translate = function (method, request) {
+                var data,
+                    key,
+                    keyPoints,
+                    dataPoints,
+                    translatedPoints,
+                    translatedData;
+
+                data = request.data;
+                key = request.key;
+
+                if (key.length === 0) {
+                    translatedData = data;
+                } else {
+                    keyPoints = utils.toCodePoints(key);
+                    dataPoints = utils.toCodePoints(data);
+                    translatedPoints = method(keyPoints, dataPoints);
+                    translatedData = utils.fromCodePoints(translatedPoints);
+                }
+
+                return translatedData;
+            };
+
+            /**
+            *   @method encrypt((keyPoints, dataPoints))
+            *       @argument {Array} keyPoints
+            *       @argument {Array} dataPoints
+            *       @return {Array}
+            */
+            core.encrypt = function (keyPoints, dataPoints) {
+                var modifier,
+                    dataLength,
+                    saltModulo,
+                    saltLength,
+                    minKeyLength,
+                    internalPoints,
+                    saltIndex,
+                    saltPoints,
+                    tmpPoints,
+                    encryptedPoints;
+
+                modifier = utils.random(charsetLength);
+                dataLength = dataPoints.length;
+                saltModulo = keyPoints.length;
+                saltLength = utils.reduce(keyPoints, saltModulo, modifier);
+                minKeyLength = dataLength + saltLength + 1;
+                internalPoints = core.getInternalPoints(keyPoints, minKeyLength);
+                saltIndex = utils.reduce(internalPoints, dataLength);
+                saltPoints = core.getSaltPoints(saltLength);
+                tmpPoints = core.encryptData(internalPoints, dataPoints);
+                tmpPoints = core.encryptData(saltPoints, tmpPoints);
+                utils.spliceAll(tmpPoints, saltIndex, 0, saltPoints);
+                tmpPoints.push(core.encryptData(keyPoints, [modifier])[0]);
+                encryptedPoints = core.encryptData(keyPoints, tmpPoints);
+
+                return encryptedPoints;
+            };
+
+            /**
+            *   @method decrypt((keyPoints, dataPoints))
+            *       @argument {Array} keyPoints
+            *       @argument {Array} dataPoints
+            *       @return {Array}
+            */
+            core.decrypt = function (keyPoints, dataPoints) {
+                var modifier,
+                    saltModulo,
+                    saltLength,
+                    minKeyLength,
+                    dataLength,
+                    internalPoints,
+                    saltIndex,
+                    tmpPoints,
+                    saltPoints,
+                    decryptedPoints;
+
+
+                tmpPoints = core.decryptData(keyPoints, dataPoints);
+                modifier = core.decryptData(keyPoints, [tmpPoints.pop()])[0];
+                saltModulo = keyPoints.length;
+                saltLength = utils.reduce(keyPoints, saltModulo, modifier);
+                minKeyLength = tmpPoints.length;
+                dataLength = minKeyLength - saltLength;
+                internalPoints = core.getInternalPoints(keyPoints, minKeyLength);
+                saltIndex = utils.reduce(internalPoints, dataLength);
+                saltPoints = utils.spliceAll(tmpPoints, saltIndex, saltLength, []);
+                tmpPoints = core.decryptData(saltPoints, tmpPoints);
+                decryptedPoints = core.decryptData(internalPoints, tmpPoints);
+
+                return decryptedPoints;
+            };
+
+            /**
+            *   @method encryptData((keyPoints, dataPoints))
+            *       @argument {Array} keyPoints
+            *       @argument {Array} dataPoints
+            *       @return {Array}
+            */
+            core.encryptData = function () {
+                var encrypt;
+
+                encrypt = function (keyPoints, dataPoints, keyIterator) {
+                    if (keyIterator === keyPoints.length) {
+                        return dataPoints;
+                    }
+
+                    return function () {
+                        var dataIterator,
+                            dataLength,
+                            keyPoint,
+                            modifier,
+                            index,
+                            tmpPoints,
+                            dataPoint;
+
+                        dataIterator = 0;
+                        dataLength = dataPoints.length;
+                        keyPoint = keyPoints[keyIterator];
+                        modifier = keyPoint;
+                        index = (dataLength + keyIterator + dataIterator) % dataLength;
+
+                        if ((dataLength ^ keyPoint ^ charsetLength) % 2) {
+                            dataPoints.reverse();
+                        }
+
+                        tmpPoints = utils.move(dataPoints, index, keyPoint, true);
+
+                        for (; dataIterator < dataLength; dataIterator += 1) {
+                            dataPoint = tmpPoints[dataIterator];
+                            modifier = ((dataPoint + modifier) ^ keyPoint) % charsetLength;
+                            tmpPoints[dataIterator] = modifier;
+                        }
+
+                        return encrypt(keyPoints, tmpPoints, keyIterator + 1);
+                    };
+                };
+
+                return function (keyPoints, dataPoints) {
+                    return utils.trampoline(encrypt(keyPoints, dataPoints, 0));
+                };
+            }();
+
+            /**
+            *   @method decryptData((keyPoints, dataPoints))
+            *       @argument {Array} keyPoints
+            *       @argument {Array} dataPoints
+            *       @return {Array}
+            */
+            core.decryptData = function () {
+                var decrypt;
+
+                decrypt = function (keyPoints, dataPoints, keyIterator) {
+                    if (keyIterator < 0) {
+                        return dataPoints;
+                    }
+
+                    return function () {
+                        var dataLength,
+                            dataIterator,
+                            keyPoint,
+                            dataPoint,
+                            modifier,
+                            index;
+
+                        dataLength = dataPoints.length;
+                        dataIterator = dataLength - 1;
+                        keyPoint = keyPoints[keyIterator];
+
+                        for (; dataIterator > -1; dataIterator -= 1) {
+                            dataPoint = dataPoints[dataIterator] + charsetLength;
+
+                            modifier = dataIterator === 0
+                                ? keyPoint
+                                : dataPoints[dataIterator - 1];
+
+                            dataPoint = ((dataPoint ^ keyPoint) - modifier) % charsetLength;
+                            dataPoints[dataIterator] = dataPoint;
+                        }
+
+                        index = (dataLength + keyIterator + dataIterator + 1) % dataLength;
+
+                        dataPoints = utils.move(dataPoints, index, keyPoint, false);
+
+                        if ((dataLength ^ keyPoint ^ charsetLength) % 2) {
+                            dataPoints.reverse();
+                        }
+
+                        return decrypt(keyPoints, dataPoints, keyIterator - 1);
+                    };
+                };
+
+                return function (keyPoints, dataPoints) {
+                    return utils.trampoline(decrypt(keyPoints, dataPoints, keyPoints.length - 1));
+                };
+            }();
+
+            return core;
+        }();
+
         /**
-        *   @method {Function} encrypt(request)
-        *       @argument {Object} request
-        *       @argument {String} request.data
-        *       @argument {String} request.key
-        *       @return {String}
+        *   @property {Object} HEA
         */
-        encrypt: core.translate.bind(this, core.encrypt),
-        /**
-        *   @method {Function} decrypt(request)
-        *       @argument {Object} request
-        *       @argument {String} request.data
-        *       @argument {String} request.key
-        *       @return {String}
-        */
-        decrypt: core.translate.bind(this, core.decrypt)
+        global.HEA = {
+            /**
+            *   @method {Function} encrypt(request)
+            *       @argument {Object} request
+            *       @argument {String} request.data
+            *       @argument {String} request.key
+            *       @return {String}
+            */
+            encrypt: core.translate.bind(this, core.encrypt),
+            /**
+            *   @method {Function} decrypt(request)
+            *       @argument {Object} request
+            *       @argument {String} request.data
+            *       @argument {String} request.key
+            *       @return {String}
+            */
+            decrypt: core.translate.bind(this, core.decrypt)
+        };
+
+        global.onmessage = function (event) {
+            var request,
+                method,
+                result;
+
+            request = event.data;
+
+            method = global.HEA[request.method];
+
+            result = method(request);
+
+            global.postMessage(result);
+        };
     };
+
+    sourceData = 'void ' + source + '(this);';
+    sourceBlob = new Blob([sourceData], {type: 'application/javascript'});
     
-    global.onmessage = function (event) {
-        var request,
-            method,
-            result;
-
-        request = event.data;
-
-        method = global.HEA[request.method];
-
-        result = method(request);
-
-        global.postMessage(result);
-    };
-};
-
-sourceData = 'void ' + source + '(this);';
-sourceBlob = new Blob([sourceData], {type: 'application/javascript'});
-HEASourceURL = window.URL.createObjectURL(sourceBlob);
+    return global.URL.createObjectURL(sourceBlob);
+}(this);
