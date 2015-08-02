@@ -5,6 +5,9 @@ https://github.com/Lcfvs/HEA.js
 */
 var HEASourceURL;
 
+/**
+ * {String} HEASourceURL
+**/
 HEASourceURL = function (global) {
     var source,
         sourceData,
@@ -25,33 +28,33 @@ HEASourceURL = function (global) {
             utils = {};
 
             /**
-            *   @method demethodize(method) - avoids .call method
-            *       @argument {Function} method
-            *       @return {Function}
-            *           @argument {Mixed} context
-            *           @argument {Mixed} ...args
-            *           @return {Mixed}
-            */
+             *  @method demethodize(method) - avoids .call method
+             *      @argument {Function} method
+             *      @return {Function}
+             *          @argument {Mixed} context
+             *          @argument {Mixed} ...args
+             *          @return {Mixed}
+            **/
             utils.demethodize = Function.bind.bind(Function.call);
 
             /**
-            *   @method demethodize(method) - avoids .apply method
-            *       @argument {Function} method
-            *       @return {Function}
-            *           @argument {Mixed} context
-            *           @argument {Array} args
-            *           @return {Mixed}
-            */
+             *  @method demethodize(method) - avoids .apply method
+             *      @argument {Function} method
+             *      @return {Function}
+             *          @argument {Mixed} context
+             *          @argument {Array} args
+             *          @return {Mixed}
+            **/
             utils.demethodizeAll = Function.bind.bind(Function.apply);
 
             /**
-            *   @method spliceAll(array, index, howMany[, values])
-            *       @argument {Array} array
-            *       @argument {Number} index
-            *       @argument {Number} howMany
-            *       @argument {Array=} values
-            *       @return {Array}
-            */
+             *  @method spliceAll(array, index, howMany[, values])
+             *      @argument {Array} array
+             *      @argument {Number} index
+             *      @argument {Number} howMany
+             *      @argument {Array=} values
+             *      @return {Array}
+            **/
             utils.spliceAll = function () {
                 var spliceAll;
 
@@ -67,17 +70,17 @@ HEASourceURL = function (global) {
             }();
 
             /**
-            *   @method fromCharCodes(charCodes)
-            *       @argument {Array} charCodes
-            *       @return {String}
-            */
+             *  @method fromCharCodes(charCodes)
+             *      @argument {Array} charCodes
+             *      @return {String}
+            **/
             utils.fromCharCodes = utils.demethodizeAll(String.fromCharCode, null);
 
             /**
-            *   @method toCodePoints(string)
-            *       @argument {String} string
-            *       @return {Array}
-            */
+             *  @method toCodePoints(string)
+             *      @argument {String} string
+             *      @return {Array}
+            **/
             utils.fromCodePoints = function (codePoints) {
                 var iterator,
                     current,
@@ -101,10 +104,10 @@ HEASourceURL = function (global) {
             };
 
             /**
-            *   @method toCodePoints(string)
-            *       @argument {String} string
-            *       @return {Array}
-            */
+             *  @method toCodePoints(string)
+             *      @argument {String} string
+             *      @return {Array}
+            **/
             utils.toCodePoints = function (string) {
                 var iterator,
                     length,
@@ -138,12 +141,12 @@ HEASourceURL = function (global) {
             };
 
             /**
-            *   @method reduce(array, modulo, modifier)
-            *       @argument {Array} array
-            *       @argument {Number} modulo
-            *       @argument {Number} modifier
-            *       @return {Number}
-            */
+             *  @method reduce(array, modulo, modifier)
+             *      @argument {Array} array
+             *      @argument {Number} modulo
+             *      @argument {Number} modifier
+             *      @return {Number}
+            **/
             utils.reduce = function (array, modulo, modifier) {
                 return array.concat([modifier || 0])
                 .reduce(function (previous, current) {
@@ -152,22 +155,22 @@ HEASourceURL = function (global) {
             };
 
             /**
-            *   @method random(modulo)
-            *       @argument {Number} modulo
-            *       @return {Number}
-            */
+             *  @method random(modulo)
+             *      @argument {Number} modulo
+             *      @return {Number}
+            **/
             utils.random = function (modulo) {
                 return ~~(Math.random() * 1e9) % modulo;
             };
 
             /**
-            *   @method move(array, index, keyCode, toRight)
-            *       @argument {Array} array
-            *       @argument {Number} index
-            *       @argument {Number} keyCode
-            *       @argument {Boolean} toRight
-            *       @return {Array}
-            */
+             *  @method move(array, index, keyCode, toRight)
+             *      @argument {Array} array
+             *      @argument {Number} index
+             *      @argument {Number} keyCode
+             *      @argument {Boolean} toRight
+             *      @return {Array}
+            **/
             utils.move = function (array, index, keyPoint, toRight) {
                 var length,
                     position,
@@ -197,10 +200,10 @@ HEASourceURL = function (global) {
             };
 
             /**
-            *   @method trampoline(result)
-            *       @argument {Mixed} result
-            *       @return {Mixed}
-            */
+             *  @method trampoline(result)
+             *      @argument {Mixed} result
+             *      @return {Mixed}
+            **/
             utils.trampoline = function (result) {
                 while (typeof result === 'function') {
                     result = result();
@@ -218,10 +221,10 @@ HEASourceURL = function (global) {
             core = {};
 
             /**
-            *   @method getSaltPoints(length)
-            *       @argument {Number} length
-            *       @return {Array}
-            */
+             *  @method getSaltPoints(length)
+             *      @argument {Number} length
+             *      @return {Array}
+            **/
             core.getSaltPoints = function () {
                 var addSaltPoint;
 
@@ -246,11 +249,11 @@ HEASourceURL = function (global) {
             }();
 
             /**
-            *   @method getInternalPoints(codePoints, minLength)
-            *       @argument {Array} codePoints
-            *       @argument {Number} minLength
-            *       @return {Array}
-            */
+             *  @method getInternalPoints(codePoints, minLength)
+             *      @argument {Array} codePoints
+             *      @argument {Number} minLength
+             *      @return {Array}
+            **/
             core.getInternalPoints = function () {
                 var addCodePoints;
 
@@ -276,13 +279,13 @@ HEASourceURL = function (global) {
             }();
 
             /**
-            *   @method translate(method, request)
-            *       @argument {Function} method
-            *       @argument {Object} request
-            *       @argument {String} request.data
-            *       @argument {String} request.key
-            *       @return {String}
-            */
+             *  @method translate(method, request)
+             *      @argument {Function} method
+             *      @argument {Object} request
+             *      @argument {String} request.data
+             *      @argument {String} request.key
+             *      @return {String}
+            **/
             core.translate = function (method, request) {
                 var data,
                     key,
@@ -307,11 +310,11 @@ HEASourceURL = function (global) {
             };
 
             /**
-            *   @method encrypt((keyPoints, dataPoints))
-            *       @argument {Array} keyPoints
-            *       @argument {Array} dataPoints
-            *       @return {Array}
-            */
+             *  @method encrypt((keyPoints, dataPoints))
+             *      @argument {Array} keyPoints
+             *      @argument {Array} dataPoints
+             *      @return {Array}
+            **/
             core.encrypt = function (keyPoints, dataPoints) {
                 var modifier,
                     dataLength,
@@ -342,11 +345,11 @@ HEASourceURL = function (global) {
             };
 
             /**
-            *   @method decrypt((keyPoints, dataPoints))
-            *       @argument {Array} keyPoints
-            *       @argument {Array} dataPoints
-            *       @return {Array}
-            */
+             *  @method decrypt((keyPoints, dataPoints))
+             *      @argument {Array} keyPoints
+             *      @argument {Array} dataPoints
+             *      @return {Array}
+            **/
             core.decrypt = function (keyPoints, dataPoints) {
                 var modifier,
                     saltModulo,
@@ -376,11 +379,11 @@ HEASourceURL = function (global) {
             };
 
             /**
-            *   @method encryptData((keyPoints, dataPoints))
-            *       @argument {Array} keyPoints
-            *       @argument {Array} dataPoints
-            *       @return {Array}
-            */
+             *  @method encryptData((keyPoints, dataPoints))
+             *      @argument {Array} keyPoints
+             *      @argument {Array} dataPoints
+             *      @return {Array}
+            **/
             core.encryptData = function () {
                 var encrypt;
 
@@ -426,11 +429,11 @@ HEASourceURL = function (global) {
             }();
 
             /**
-            *   @method decryptData((keyPoints, dataPoints))
-            *       @argument {Array} keyPoints
-            *       @argument {Array} dataPoints
-            *       @return {Array}
-            */
+             *  @method decryptData((keyPoints, dataPoints))
+             *      @argument {Array} keyPoints
+             *      @argument {Array} dataPoints
+             *      @return {Array}
+            **/
             core.decryptData = function () {
                 var decrypt;
 
@@ -483,24 +486,24 @@ HEASourceURL = function (global) {
         }();
 
         /**
-        *   @property {Object} HEA
-        */
+         *  @property {Object} HEA
+        **/
         global.HEA = {
             /**
-            *   @method {Function} encrypt(request)
-            *       @argument {Object} request
-            *       @argument {String} request.data
-            *       @argument {String} request.key
-            *       @return {String}
-            */
+             *  @method {Function} encrypt(request)
+             *     @argument {Object} request
+             *     @argument {String} request.data
+             *     @argument {String} request.key
+             *     @return {String}
+             */
             encrypt: core.translate.bind(this, core.encrypt),
             /**
-            *   @method {Function} decrypt(request)
-            *       @argument {Object} request
-            *       @argument {String} request.data
-            *       @argument {String} request.key
-            *       @return {String}
-            */
+             *  @method {Function} decrypt(request)
+             *     @argument {Object} request
+             *     @argument {String} request.data
+             *     @argument {String} request.key
+             *     @return {String}
+             */
             decrypt: core.translate.bind(this, core.decrypt)
         };
 
