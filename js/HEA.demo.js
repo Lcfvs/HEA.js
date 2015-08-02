@@ -30,13 +30,9 @@ void function (global) {
             ? global.decodeURIComponent(global.escape(global.atob(dataTextarea.value)))
             : dataTextarea.value;
 
-        HEAWorker = new global.Worker(HEASourceURL);
+        HEAWorker = new global.Worker('HEA.js');
 
         if (keyInput.value !== '') {
-            if (method === 'decrypt') {
-
-            }
-
             HEAWorker.postMessage({
                 method: method,
                 data: data,
