@@ -8,7 +8,7 @@ void function (global) {
         decryptButton;
 
     document = global.document;
-    
+
     gEBI = function gEBI(id) {
         return document.getElementById(id);
     };
@@ -20,21 +20,39 @@ void function (global) {
     decryptButton = gEBI('decrypt');
 
     encryptButton.onclick = decryptButton.onclick = function (event) {
-        var HEAWorker;
+        var method,
+            data,
+            HEAWorker;
+
+        method = this.id;
+
+        data = method === 'decrypt'
+            ? global.decodeURIComponent(global.escape(global.atob(dataTextarea.value)))
+            : dataTextarea.value;
 
         HEAWorker = new global.Worker(HEASourceURL);
 
         if (keyInput.value !== '') {
+            if (method === 'decrypt') {
+
+            }
+
             HEAWorker.postMessage({
-                method: this.id,
-                data: dataTextarea.value,
+                method: method,
+                data: data,
                 key: keyInput.value
             });
 
             HEAWorker.onmessage = function onmessage(event) {
+                var data;
+
+                data = method === 'encrypt'
+                    ? global.btoa(global.unescape(global.encodeURIComponent(event.data)))
+                    : event.data;
+
                 this.terminate();
 
-                dataTextarea.value = event.data;
+                dataTextarea.value = data;
             };
         } else {
             global.setTimeout(function () {
