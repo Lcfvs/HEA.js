@@ -34,7 +34,7 @@ void function (global) {
             worker.onmessage = function onmessage(event) {
                 worker.terminate();
 
-                dataTextarea.value = data;
+                dataTextarea.value = event.data;
             };
         } else {
             global.setTimeout(function () {
