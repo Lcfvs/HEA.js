@@ -265,7 +265,7 @@ HEASourceURL = function (global) {
             };
 
             /**
-             *  @method encrypt((keyCodes, dataCodes))
+             *  @method encrypt(keyCodes, dataCodes)
              *      @argument {Array} keyCodes
              *      @argument {Array} dataCodes
              *      @return {Array}
@@ -300,7 +300,7 @@ HEASourceURL = function (global) {
             };
 
             /**
-             *  @method decrypt((keyCodes, dataCodes))
+             *  @method decrypt(keyCodes, dataCodes)
              *      @argument {Array} keyCodes
              *      @argument {Array} dataCodes
              *      @return {Array}
@@ -333,7 +333,7 @@ HEASourceURL = function (global) {
             };
 
             /**
-             *  @method encryptData((keyCodes, dataCodes))
+             *  @method encryptData(keyCodes, dataCodes)
              *      @argument {Array} keyCodes
              *      @argument {Array} dataCodes
              *      @return {Array}
@@ -383,7 +383,7 @@ HEASourceURL = function (global) {
             }();
 
             /**
-             *  @method decryptData((keyCodes, dataCodes))
+             *  @method decryptData(keyCodes, dataCodes)
              *      @argument {Array} keyCodes
              *      @argument {Array} dataCodes
              *      @return {Array}
@@ -478,7 +478,5 @@ HEASourceURL = function (global) {
         };
     };
     
-    return global.URL.createObjectURL(new global.Blob(['void ' + source + '(this);'], {
-        type: 'application/javascript'
-    }));
+    return 'data:application/javascript;base64,' + btoa('void ' + source + '(this);');
 }(this);
