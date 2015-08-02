@@ -20,33 +20,19 @@ void function (global) {
     decryptButton = gEBI('decrypt');
 
     encryptButton.onclick = decryptButton.onclick = function (event) {
-        var method,
-            data,
-            HEAWorker;
+        var worker;
 
-        method = this.id;
-
-        data = method === 'decrypt'
-            ? global.decodeURIComponent(global.escape(global.atob(dataTextarea.value)))
-            : dataTextarea.value;
-
-        HEAWorker = new global.Worker('js/HEA.js');
+        worker = new global.Worker('HEA.js');
 
         if (keyInput.value !== '') {
-            HEAWorker.postMessage({
-                method: method,
-                data: data,
+            worker.postMessage({
+                method: this.id,
+                data: dataTextarea.value,
                 key: keyInput.value
             });
 
-            HEAWorker.onmessage = function onmessage(event) {
-                var data;
-
-                data = method === 'encrypt'
-                    ? global.btoa(global.unescape(global.encodeURIComponent(event.data)))
-                    : event.data;
-
-                this.terminate();
+            worker.onmessage = function onmessage(event) {
+                worker.terminate();
 
                 dataTextarea.value = data;
             };
