@@ -22,7 +22,7 @@ void function (global) {
     encryptButton.onclick = decryptButton.onclick = function (event) {
         var worker;
 
-        worker = new global.Worker('HEA.js');
+        worker = new global.Worker('js/HEA.js');
 
         if (keyInput.value !== '') {
             worker.postMessage({
