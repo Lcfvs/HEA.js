@@ -501,36 +501,22 @@ source = function (global) {
         */
         decrypt: core.translate.bind(this, core.decrypt)
     };
-}(this);
-
-void function (scope) {
-    'use strict';
-
-    var HEA,
-        postMessage,
-        onmessage;
-
-    HEA = scope.HEA;
-
-    postMessage = scope.postMessage;
-
-    onmessage = function onmessage(event) {
+    
+    global.onmessage = function (event) {
         var request,
             method,
             result;
 
         request = event.data;
 
-        method = HEA[request.method];
+        method = global.HEA[request.method];
 
         result = method(request);
 
-        postMessage(result);
+        global.postMessage(result);
     };
-
-    scope.onmessage = onmessage;
 };
-    
+
 sourceData = 'void ' + source + '(this);';
 sourceBlob = new Blob([sourceData], {type: 'application/javascript'});
 HEASourceURL = window.URL.createObjectURL(sourceBlob);
