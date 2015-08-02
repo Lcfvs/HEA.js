@@ -48,7 +48,7 @@ source = function () {
             *       @argument {Array} array
             *       @argument {Number} index
             *       @argument {Number} howMany
-            *       @optional @argument {Array} values
+            *       @argument {Array=} values
             *       @return {Array}
             */
             utils.spliceAll = function () {
@@ -278,8 +278,8 @@ source = function () {
             *   @method translate(method, request)
             *       @argument {Function} method
             *       @argument {Object} request
-            *           @property {String} data
-            *           @property {String} key
+            *       @argument {String} request.data
+            *       @argument {String} request.key
             *       @return {String}
             */
             core.translate = function (method, request) {
@@ -488,16 +488,16 @@ source = function () {
             /**
             *   @method {Function} encrypt(request)
             *       @argument {Object} request
-            *           @property {String} data
-            *           @property {String} key
+            *       @argument {String} request.data
+            *       @argument {String} request.key
             *       @return {String}
             */
             encrypt: core.translate.bind(this, core.encrypt),
             /**
             *   @method {Function} decrypt(request)
             *       @argument {Object} request
-            *           @property {String} data
-            *           @property {String} key
+            *       @argument {String} request.data
+            *       @argument {String} request.key
             *       @return {String}
             */
             decrypt: core.translate.bind(this, core.decrypt)
