@@ -28,7 +28,7 @@ source = function () {
             *       @argument {Function} method
             *       @return {Function}
             *           @argument {Mixed} context
-            *           @rest {Mixed} args
+            *           @argument {Mixed} ...args
             *           @return {Mixed}
             */
             utils.demethodize = Function.bind.bind(Function.call);
