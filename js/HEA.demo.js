@@ -1,6 +1,14 @@
-(function () {
-    var gEBI, dataTextarea, keyInput, methodSelect, encryptButton, decryptButton;
+void function (global) {
+    var document,
+        gEBI,
+        dataTextarea,
+        keyInput,
+        methodSelect,
+        encryptButton,
+        decryptButton;
 
+    document = global.document;
+    
     gEBI = function gEBI(id) {
         return document.getElementById(id);
     };
@@ -14,7 +22,7 @@
     encryptButton.onclick = decryptButton.onclick = function (event) {
         var HEAWorker;
 
-        HEAWorker = new Worker(HEASourceURL);
+        HEAWorker = new global.Worker(HEASourceURL);
 
         if (keyInput.value !== '') {
             HEAWorker.postMessage({
@@ -29,8 +37,8 @@
                 dataTextarea.value = event.data;
             };
         } else {
-            setTimeout(function () {
-                alert('Invalid encryption key');
+            global.setTimeout(function () {
+                global.alert('Invalid encryption key');
             });
         }
 
@@ -39,4 +47,4 @@
 
         return false;
     };
-}());
+}(this);
