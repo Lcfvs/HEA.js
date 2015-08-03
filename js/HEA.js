@@ -210,11 +210,11 @@ void function (global) {
                 }
 
                 return function () {
-                    var tmpCodeCodes;
+                    var tmpCodes;
 
-                    tmpCodeCodes = internalCodeCodes.concat(charCodes);
-                    tmpCodeCodes = core.encryptData(charCodes, tmpCodeCodes);
-                    internalCodeCodes = internalCodeCodes.concat(tmpCodeCodes);
+                    tmpCodes = internalCodeCodes.concat(charCodes);
+                    tmpCodes = core.encryptData(charCodes, tmpCodes);
+                    internalCodeCodes = internalCodeCodes.concat(tmpCodes);
 
                     return addCodeCodes(internalCodeCodes, charCodes, minLength);
                 };
@@ -272,6 +272,7 @@ void function (global) {
                 saltIndex,
                 saltCodes,
                 tmpCodes,
+                lastIndex,
                 encryptedCodes;
 
             modifier = utils.random(charsetLength);
@@ -284,8 +285,15 @@ void function (global) {
             saltCodes = core.getSaltCodes(saltLength);
             tmpCodes = core.encryptData(internalCodes, dataCodes);
             tmpCodes = core.encryptData(saltCodes, tmpCodes);
-            utils.spliceAll(tmpCodes, saltIndex, 0, saltCodes);
+            lastIndex = 0;
+
+            saltCodes.forEach(function (value, index) {
+                lastIndex = ((saltIndex * index) % dataLength) % charsetLength;
+                tmpCodes.splice(lastIndex, 0, value);
+            });
+
             tmpCodes.push(core.encryptData(keyCodes, [modifier])[0]);
+            tmpCodes.push(core.encryptData(keyCodes, [lastIndex])[0]);
             encryptedCodes = core.encryptData(keyCodes, tmpCodes);
 
             return encryptedCodes;
@@ -299,6 +307,7 @@ void function (global) {
         **/
         core.decrypt = function (keyCodes, dataCodes) {
             var modifier,
+                lastIndex,
                 saltModulo,
                 saltLength,
                 minKeyLength,
@@ -310,6 +319,7 @@ void function (global) {
                 decryptedCodes;
 
             tmpCodes = core.decryptData(keyCodes, dataCodes);
+            lastIndex = core.decryptData(keyCodes, [tmpCodes.pop()])[0];
             modifier = core.decryptData(keyCodes, [tmpCodes.pop()])[0];
             saltModulo = keyCodes.length;
             saltLength = utils.reduce(keyCodes, saltModulo, modifier);
@@ -317,7 +327,15 @@ void function (global) {
             dataLength = minKeyLength - saltLength;
             internalCodes = core.getInternalCodes(keyCodes, minKeyLength);
             saltIndex = utils.reduce(internalCodes, dataLength);
-            saltCodes = utils.spliceAll(tmpCodes, saltIndex, saltLength, []);
+            saltCodes = [];
+
+            for (;saltLength;) {
+                saltLength -= 1;
+                lastIndex = ((saltLength * saltIndex) % dataLength) % charsetLength;
+
+                saltCodes.unshift(tmpCodes.splice(lastIndex, 1)[0]);
+            }
+
             tmpCodes = core.decryptData(saltCodes, tmpCodes);
             decryptedCodes = core.decryptData(internalCodes, tmpCodes);
 
@@ -465,7 +483,7 @@ void function (global) {
         result = method(request);
 
         global.postMessage(result);
-        
+
         return result;
     };
 }(this);
