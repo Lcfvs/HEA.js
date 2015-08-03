@@ -38,6 +38,28 @@ void function (global) {
         utils.demethodizeAll = Function.bind.bind(Function.apply);
 
         /**
+         *  @method spliceAll(array, index, howMany[, values])
+         *      @argument {Array} array
+         *      @argument {Number} index
+         *      @argument {Number} howMany
+         *      @argument {Array=} values
+         *      @return {Array}
+        **/
+        utils.spliceAll = function () {
+            var spliceAll;
+
+            spliceAll = utils.demethodizeAll(Array.prototype.splice);
+
+            return function (array, index, howMany, values) {
+                var args;
+
+                args = [index, howMany].concat(values);
+
+                return spliceAll(array, args);
+            };
+        }();
+
+        /**
          *  @method fromCharCodes(charCodes)
          *      @argument {Array} charCodes
          *      @return {String}
