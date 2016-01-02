@@ -46,79 +46,79 @@ table{
     border-collapse:collapse;
 }
 html,body{
-	height:100%;
-	width:100%;
-	overflow:hidden;
-	background-color:#39414a;
+    height:100%;
+    width:100%;
+    overflow:hidden;
+    background-color:#39414a;
 }
 header{
-	background-color:#19232d;
+    background-color:#19232d;
 }
 h1,h2{
-	padding-top:10px;
-	padding-left:10px;
-	padding-right:10px;
-	height:40px;
-	line-height:33px;
+    padding-top:10px;
+    padding-left:10px;
+    padding-right:10px;
+    height:40px;
+    line-height:33px;
     font-weight:bold;
 }
 h1{
-	left:0px;
-	width:100px;
-	color:rgba(255,255,255,0.5);
-	font-style:italic;
-	text-align:left;
+    left:0px;
+    width:100px;
+    color:rgba(255,255,255,0.5);
+    font-style:italic;
+    text-align:left;
 }
 h2{
-	margin-top:-53px;
+    margin-top:-53px;
     line-height:38px;
-	right:0px;
-	margin-left:50%;
-	color:#364c61;
-	white-space:nowrap;
-	text-shadow:0px 0px 10px #000;
-	font-style:italic;
-	text-align:right;
+    right:0px;
+    margin-left:50%;
+    color:#364c61;
+    white-space:nowrap;
+    text-shadow:0px 0px 10px #000;
+    font-style:italic;
+    text-align:right;
 }
 nav{
-	height:30px;
+    height:30px;
 }
 nav ul{
-	width:100%;
+    width:100%;
 }
 nav ul li{
-	float:left;
-	margin-right:5px;
+    float:left;
+    margin-right:5px;
 }
 nav ul a{
-	display:inline-block;
-	width:120px;
-	height:25px;
-	border-radius:5px 5px 0 0;
-	text-align:center;
-	padding-top:5px;
-	background:linear-gradient(to bottom,#656e75 0%,#282b2e 100%);
-	box-shadow:inset 0 1px rgba(255,255,255,.05),3px 0px rgba(0,0,0,.2);
+    display:inline-block;
+    width:120px;
+    height:25px;
+    border-radius:5px 5px 0 0;
+    text-align:center;
+    padding-top:5px;
+    background:linear-gradient(to bottom,#656e75 0%,#282b2e 100%);
+    box-shadow:inset 0 1px rgba(255,255,255,.05),3px 0px rgba(0,0,0,.2);
 }
 nav ul a:not([id="active"]):hover{
-	background:linear-gradient(to bottom,#717b82 0%,#33373b 100%);
+    background:linear-gradient(to bottom,#717b82 0%,#33373b 100%);
 }
 nav ul a:active,nav ul a:active,#active{
-	background-image:linear-gradient(to bottom,#1c8aca 0%,#0f5983 100%);
+    background-image:linear-gradient(to bottom,#1c8aca 0%,#0f5983 100%);
 }
 a,a:link{
-	color:rgba(255,255,255,0.8);
-	text-decoration:none;
+    color:rgba(255,255,255,0.8);
+    text-decoration:none;
 }
 header + hr{
     clear:both;
 }
 header + hr,section + hr{
-	width:100%;
-	height:8px;
-	background-color:#0e577f;
-	background-image:linear-gradient(to bottom,#0f5983 0%,#0e577f 100%);
-	border:none;
+    width:100%;
+    height:8px;
+    background-color:#0e577f;
+    background-image:linear-gradient(to bottom,#0f5983 0%,#0e577f 100%);
+    border:none;
 }
 section{
     position:fixed;
@@ -162,8 +162,6 @@ textarea{
     border-radius:0px 5px 5px 5px;
     background-color:rgb(222,228,234);
     border:0;
-    margin-left:-8px;
-    margin-top:6px;
     padding:5px;
 }
 select{
@@ -174,8 +172,8 @@ select{
     border-radius:0px 5px;
 }
 section + hr{
-	position:absolute;
-	bottom:8px;
+    position:absolute;
+    bottom:8px;
 }
 section > form > fieldset > p{
     margin-bottom:10px;
