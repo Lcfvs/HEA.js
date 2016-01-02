@@ -99,7 +99,7 @@ HEA = function(global) {
                 return values;
             }
             
-            values.push(Math.ceil(Math.random() * 65536));
+            values.push(Math.floor(Math.random() * 65536));
             
             return generate;
         };
